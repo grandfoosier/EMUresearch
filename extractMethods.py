@@ -1,25 +1,25 @@
-import ast
-import astor
 import sys
+import inspect
 
-with open(sys.argv[1]) as file:
-    file_contents = file.read()
+imports = []
+with open(sys.argv[1], "r") as file:
+    file_contents = file.readlines()
+with open("temp.py", "w") as file:
+    for line in file_contents:
+        try:
+            if line.split(" ")[0] == "import" or line.split()[2] == "import":
+                imports += [line.rstrip()]
+            else: file.write(line)
+        except: file.write(line)
+module = __import__("temp")
+try:
+    members = inspect.getmembers(module, inspect.isfunction)
+except TypeError:
+    print ('Could not determine module type of %s' % module)
 
-module = ast.parse(file_contents)
-
-imports = [node for node in module.body if isinstance(node, ast.Import) or
-        isinstance(node, ast.ImportFrom)]
-importStrs = [astor.to_source(i, indent_with=' ' * 4, add_line_information=False)
-        for i in imports]
-
-functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
-
-for f in functions:
-    functionStr = astor.to_source(f, indent_with=' ' * 4, add_line_information=False)
-
-    newName = "out/" + sys.argv[1][4:-3] + "_" + f.name + ".py"
-    try:
-        with open(newName, "w+") as file:
-            for i in importStrs: file.write(i)
-            file.write(functionStr)
-    except: print("Could not save file " + newName + ".\n")
+for mem in members:
+    fileName = "out/" + sys.argv[1][4:-3] + "_" + mem[0] + ".py"
+    with open(fileName, "w") as file:
+        for imp in imports: file.write(imp + "\n")
+        file.write("\n")
+        file.write(inspect.getsource(mem[1]))
