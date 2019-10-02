@@ -10,7 +10,7 @@ def scan():
     # Get the address and get the files from Github
     for project in projects:
         l = project.find("https://")
-        fpf.openPage(project[l: -5])
+        fpf.crawlProj(project[l: -5])
 
 if __name__ == "__main__":
     scan()
