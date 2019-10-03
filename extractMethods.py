@@ -2,7 +2,7 @@ import pathlib
 import inspect
 import sys
 
-from redbaron import RedBaron
+from libs.redbaron.redbaron import RedBaron
 
 # This will find what classes functions belong to, and will check up to
 # one inner class depth
