@@ -7,9 +7,22 @@ from redbaron import RedBaron
 # This will find what classes functions belong to, and will check up to
 # one inner class depth
 def extract(fileIn):
-    with open(fileIn, "r", encoding='utf-8') as file:
-        # Read the file and find the class and def nodes
-        red = RedBaron(file.read())
+    # If RedBaron gives an exception, log it and end, otherwise continue
+    try:
+        with open(fileIn, "r", encoding='utf-8') as file:
+            # Read the file and find the class and def nodes
+            red = RedBaron(file.read())
+            with open("sourcefiles.txt", "a") as file:
+                # Add to log
+                file.write(fileIn +"\n")
+    except:
+        with open("exceptions.txt", "a") as file:
+            # Add to log
+            file.write(fileIn +"\n")
+            print("ERROR: "+ fileIn)
+            return
+
+    paths = []
     classNodes = red.find_all("classNode")
     nClass = len(classNodes)
     defNodes = red.find_all("defNode")
@@ -44,7 +57,7 @@ def extract(fileIn):
                                cClassNodes[cc+1].name + "~" +
                                defNodes[d].name)
                     # Make a file of this function
-                    mkfile(fileIn, defNodes[d], defName)
+                    mkfile(paths, fileIn, defNodes[d], defName)
                     # Iterate the counters
                     ccd += 1; cd += 1; d += 1
                     continue
@@ -59,18 +72,22 @@ def extract(fileIn):
                 defName = (classNodes[c].name + "~" +
                            defNodes[d].name)
                 # Make a file of this function
-                mkfile(fileIn, defNodes[d], defName)
+                mkfile(paths, fileIn, defNodes[d], defName)
                 # Iterate the counters
                 cd += 1; d += 1
                 continue
         # The next def is not in a class
         defName = defNodes[d].name
         # Make a file of this function
-        mkfile(fileIn, defNodes[d], defName)
+        paths = mkfile(paths, fileIn, defNodes[d], defName)
         # Iterate the counters
         d += 1
 
-def mkfile(fileIn, node, defName):
+    # Add the sorted list of paths to the paths file
+    with open("paths.txt", "a", 1) as file:
+        for path in sorted(paths): file.write(path)
+
+def mkfile(paths, fileIn, node, defName):
     # Replace src/ with out/ and separate path from filename
     s = fileIn.rfind("/")
     path = "out"+fileIn[3:s]
@@ -84,8 +101,7 @@ def mkfile(fileIn, node, defName):
     with open(path + fileOut, "w", encoding='utf-8') as file:
         file.write(node.dumps())
     # Update the paths file
-    with open("paths.txt", "a") as file:
-        file.write("{0:80s}:  {1:s}/\n".format(fileOut[1:], path))
+        return paths + ["{0:80s}:  {1:s}/\n".format(fileOut[1:], path)]
 
 if __name__ == "__main__":
     # run as "python extractMethods.py src/name_of_target_file.py"

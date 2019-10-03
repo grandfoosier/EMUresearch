@@ -3,27 +3,30 @@ import pathlib
 import requests
 import sys
 import threading
+import time
 import urllib.request
 
 import extractMethods as ex
 
 from bs4 import BeautifulSoup
 
-linkArray = []; threads = []
+linkArray = []
 
 def crawlProj(urlIn):
-    global linkArray; global threads
+    MAX_THREADS = 50
+    LOOP_SLEEP = 0.01
+
+    global linkArray
     linkArray += [urlIn]
-    while linkArray:
+    while linkArray or threading.active_count() > 1:
         # urlIn = linkArray[0]; linkArray = linkArray[1:]
         # openPage(urlIn)
         for link in linkArray:
             linkArray.remove(link)
-            while threading.active_count() > 5: pass
+            while threading.active_count() > MAX_THREADS: pass
             thread = threading.Thread(target = openPage, args = (link,))
             thread.start()
-            threads += [thread]
-        # for thread in threads: thread.join()
+        time.sleep(LOOP_SLEEP)
 
 def openPage(urlIn):
     global linkArray
@@ -42,6 +45,7 @@ def openPage(urlIn):
         # The link is for a directory, so recursively open that link
         elif "tree/master" in addr and ".." not in text:
             linkArray += ["https://github.com"+addr]
+    return
 
 def getFile(addr):
     # Remove the "/blob" from the address
@@ -68,6 +72,7 @@ def getFile(addr):
     ex.extract(addD+fileName)
     # Delete the source file when done
     os.remove(addD+fileName)
+    return
 
 if __name__ == "__main__":
     # run as "python findPyFiles.py url_of_target_project
