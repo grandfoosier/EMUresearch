@@ -105,5 +105,5 @@ def mkfile(paths, fileIn, node, defName):
 
 if __name__ == "__main__":
     # run as "python extractMethods.py src/name_of_target_file.py"
-    # extract(sys.argv[1])
-    extract("src/testcode.py")
+    extract(sys.argv[1])
+    # extract("src/testcode.py")

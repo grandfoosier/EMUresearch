@@ -18,9 +18,12 @@ def crawlProj(urlIn):
 
     global linkArray
     linkArray += [urlIn]
-    while linkArray or threading.active_count() > 1:
+    # Single thread version:
+    # while linkArray:
         # urlIn = linkArray[0]; linkArray = linkArray[1:]
         # openPage(urlIn)
+    # Multi-thread version:
+    while linkArray or threading.active_count() > 1:
         for link in linkArray:
             linkArray.remove(link)
             while threading.active_count() > MAX_THREADS: pass
@@ -40,9 +43,9 @@ def openPage(urlIn):
     for link in links:
         addr = link['href']
         text = link.contents
-        # The link is for a .py file, so open the page and copy the file
+        # If the link is for a .py file, open the page and copy the file
         if addr[-3:] == ".py": getFile(addr)
-        # The link is for a directory, so recursively open that link
+        # If the link is for a directory, add it to the linkArray
         elif "tree/master" in addr and ".." not in text:
             linkArray += ["https://github.com"+addr]
     return
