@@ -41,18 +41,18 @@ def openPage(urlIn):
     links = soup.find_all(lambda tag: tag.name == 'a' and
                           tag.get('class') == ['js-navigation-open'])
     for link in links:
-        addr = link['href']
+        addr = link['href']; print(addr)
         text = link.contents
         # If the link is for a .py file, open the page and copy the file
         if addr[-3:] == ".py": getFile(addr)
         # If the link is for a directory, add it to the linkArray
-        elif "tree/master" in addr and ".." not in text:
+        elif "/tree/" in addr and ".." not in text:
             linkArray += ["https://github.com"+addr]
     return
 
 def getFile(addr):
-    # Remove the "/blob" from the address
-    b = addr.find("/blob")
+    # Remove the "/blob/" from the address
+    b = addr.find("/blob/")
     addB = addr[:b]+addr[b+5:]
     # Open the page
     response = requests.get("https://raw.githubusercontent.com"+addB)

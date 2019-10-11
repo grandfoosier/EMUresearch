@@ -11,8 +11,12 @@ def scan():
         projects = [line for line in file]
     # Get the address and get the files from Github
     for project in projects:
-        l = project.find("https://")
-        fpf.crawlProj(project[l: -5])
+        linesplit = project.split()
+        projname = linesplit[3][:-4]
+        # Make sure the commit hash exists
+        projcommit = linesplit[5]
+        if len(projcommit) == 40:
+            fpf.crawlProj(projname +"/tree/"+ projcommit)
 
 if __name__ == "__main__":
     scan()
