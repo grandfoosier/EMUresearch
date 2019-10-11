@@ -41,7 +41,7 @@ def openPage(urlIn):
     links = soup.find_all(lambda tag: tag.name == 'a' and
                           tag.get('class') == ['js-navigation-open'])
     for link in links:
-        addr = link['href']; print(addr)
+        addr = link['href']
         text = link.contents
         # If the link is for a .py file, open the page and copy the file
         if addr[-3:] == ".py": getFile(addr)
