@@ -58,10 +58,8 @@ def getFile(addr):
     response = requests.get("https://raw.githubusercontent.com"+addB)
     # Make sure the file isn't empty (like some __init__ files)
     if not response.text: return
-    # Remove the "/master" just for simplification
-    m = addB.find("/master")
     s = addB.rfind("/") + 1
-    addD = "src"+addB[:m]+addB[m+7:s] # directory
+    addD = "src"+addB[:s] # directory
     fileName = addB[s:]
     # Make sure the directory exists
     p = pathlib.Path(addD)
