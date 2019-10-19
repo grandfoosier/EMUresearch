@@ -2,6 +2,8 @@ import pathlib
 import inspect
 import sys
 
+from filterFiles import exclude
+
 from libs.redbaron.redbaron import RedBaron
 
 # This will find what classes functions belong to, and will check up to
@@ -88,6 +90,8 @@ def extract(fileIn):
         for path in sorted(paths): file.write(path)
 
 def mkfile(paths, fileIn, node, defName):
+    # Don't save functions on the exclusion list
+    if exclude(defName): return paths
     # Replace src/ with out/ and separate path from filename
     s = fileIn.rfind("/")
     path = "out"+fileIn[3:s]
@@ -101,7 +105,7 @@ def mkfile(paths, fileIn, node, defName):
     with open(path + fileOut, "w", encoding='utf-8') as file:
         file.write(node.dumps())
     # Update the paths file
-        return paths + ["{0:80s}:  {1:s}/\n".format(fileOut[1:], path)]
+        return paths + ["{0:79s} :  {1:s}/\n".format(fileOut[1:], path)]
 
 if __name__ == "__main__":
     # run as "python extractMethods.py src/name_of_target_file.py"

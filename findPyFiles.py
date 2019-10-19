@@ -18,10 +18,12 @@ def crawlProj(urlIn):
 
     global linkArray
     linkArray += [urlIn]
+
     # Single thread version:
     # while linkArray:
-        # urlIn = linkArray[0]; linkArray = linkArray[1:]
-        # openPage(urlIn)
+    #     urlIn = linkArray[0]; linkArray = linkArray[1:]
+    #     openPage(urlIn)
+    
     # Multi-thread version:
     while linkArray or threading.active_count() > 1:
         for link in linkArray:
