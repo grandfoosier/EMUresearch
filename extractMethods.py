@@ -2,7 +2,7 @@ import pathlib
 import inspect
 import sys
 
-from filterFiles import exclude
+from filterFiles import exclude, ex_by_len
 
 from libs.redbaron.redbaron import RedBaron
 
@@ -14,11 +14,11 @@ def extract(fileIn):
         with open(fileIn, "r", encoding='utf-8') as file:
             # Read the file and find the class and def nodes
             red = RedBaron(file.read())
-            with open("sourcefiles.txt", "a") as file:
+            with open("logs/sourcefiles.txt", "a") as file:
                 # Add to log
                 file.write(fileIn +"\n")
     except:
-        with open("exceptions.txt", "a") as file:
+        with open("logs/exceptions.txt", "a") as file:
             # Add to log
             file.write(fileIn +"\n")
             print("ERROR: "+ fileIn)
@@ -86,21 +86,27 @@ def extract(fileIn):
         d += 1
 
     # Add the sorted list of paths to the paths file
-    with open("paths.txt", "a", 1) as file:
+    with open("logs/paths.txt", "a", 1) as file:
         for path in sorted(paths): file.write(path)
 
 def mkfile(paths, fileIn, node, defName):
-    # Don't save functions on the exclusion list
-    if exclude(defName): return paths
-    # Replace src/ with out/ and separate path from filename
     s = fileIn.rfind("/")
-    path = "out"+fileIn[3:s]
     fileName = fileIn[s:-3]
+    # filename[class~defname.py
+    fileOut = str.format("%s[%s.py" % (fileName, defName))
+
+    # Don't save functions on the exclusion list
+    if exclude(fileOut): return paths
+    if ex_by_len(str(node.dumps())):
+        with open("logs/ex_funcs_short.txt", "a", 1) as file:
+            file.write(fileOut[1:] +"\n")
+        return paths
+
+    # Replace src/ with out/ and separate path from filename
+    path = "out"+fileIn[3:s]
     # Make sure the directory exists
     p = pathlib.Path(path)
     p.mkdir(parents=True, exist_ok=True)
-    # filename,,class~defname.py
-    fileOut = str.format("%s[%s.py" % (fileName, defName))
     # Write the function to the out file
     with open(path + fileOut, "w", encoding='utf-8') as file:
         file.write(node.dumps())
